@@ -102,8 +102,12 @@ def find_peaks_windowed(frequencies, times, magnitude,
         # Keep top peaks per time window (sorted by magnitude)
         proportion_keep = 0.95
         
-        # TODO: Sort the peak candidates by magnitude, descending
-        pass
+        # Done TODO: Sort the peak candidates by magnitude, descending
+        #pass
+        num_peaks_to_keep = max(1,  int(len(peak_candidates) * proportion_keep))
+        peak_candidates = peak_candidates[:num_peaks_to_keep]
+        for t_idx, f_idx, mag in peak_candidates:
+            constellation_map.append((t_idx, f_idx))
         
         # TODO: Keep the top proportion_keep of peak candidates and 
         # append the time index and frequency to the constellation map
