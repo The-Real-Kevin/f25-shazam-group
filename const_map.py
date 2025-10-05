@@ -21,11 +21,19 @@ def remove_duplicate_peaks(peaks: list[tuple[int, float]]):
     # create a copy of the peaks list to avoid modifying the original list
     peaksc=peaks.copy()
     
-    # TODO: sort peaks by time
-
+    # DONE! TODO: sort peaks by time
+    peaksc.sort(key=lambda x: x[0]) 
     
-    # TODO: for each peak, search for duplicates within the next 15 peaks (ordered by time)
-    
+    # DONE! TODO: for each peak, search for duplicates within the next 15 peaks (ordered by time)
+    i = 0
+    while i < len(peaksc):
+        j = i + 1
+        while j < min(i + 16, len(peaksc)):
+            if peaks_are_duplicate(peaksc[i], peaksc[j]):
+                peaksc.pop(j)
+            else:
+                j += 1
+        i += 1
 
     return peaksc
 
