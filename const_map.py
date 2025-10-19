@@ -66,7 +66,10 @@ def find_peaks_windowed(frequencies, times, magnitude,
     
     # TODO: create frequency bands based on logarithmic scale. Assume fft_window_size = 1024
     # Hint: start from 0-40Hz
-    bands = None
+    bands = [
+        (np.searchsorted(freq_bin_hz, edges[i], 'left'), np.searchsorted(freq_bin_hz, edges[i+1], 'right'))
+        for i in range(n_bands)
+    ]
 
     # slide a window across time axis
     # height: entire frequency range
@@ -74,7 +77,7 @@ def find_peaks_windowed(frequencies, times, magnitude,
     for t_start in range(0, num_time_bins, window_size):
         
         # TODO: Get the window of frequencies we want to work with
-        window = None
+        window = magnitude[:, t_start:t_end]
 
         peak_candidates = []
 
@@ -82,19 +85,25 @@ def find_peaks_windowed(frequencies, times, magnitude,
         # TODO: Find local maxima within the frequency bands of each window
         for f_start, f_end in bands:
             # TODO: Get the frequency band for this window
-            freq_square = None
+            freq_square = window[f_start:f_end, :]
 
             # TODO: Find the indices of the top `candidates_per_band` peaks in the freq_square
             # Hint: Flatten the 2D freq_square to 1D using np.argpartition
-            flat_indices = None
+            flat = freq_square.flatten()
+            if flat.size == 0:
+                continue
+            N = min(candidates_per_band, flat.size)
+            flat_indices = np.argpartition(flat, -N)[-N:]
 
             # 
             for idx in flat_indices:
                 # TODO: calculate the original time and frequency indices from the flattened candidate indices
                 # Hint: use np.unravel_index and .shape of freq_square to go from 1D index to 2D index
-                t_idx = None
-                f_idx = None
-                mag = None
+                rel_f_idx, rel_t_idx = np.unravel_index(idx, freq_square.shape)
+                f_idx = rel_f_idx + f_start
+                t_idx = rel_t_idx + t_start
+                mag = freq_square[rel_f_idx, rel_t_idx]
+                peak_candidates.append((t_idx, f_idx, mag))
                 
                 # Append the original time index (t_idx), frequency index (f_idx), and magnitude (mag)
                 peak_candidates.append((t_idx, f_idx, mag))
@@ -111,7 +120,13 @@ def find_peaks_windowed(frequencies, times, magnitude,
         
         # TODO: Keep the top proportion_keep of peak candidates and 
         # append the time index and frequency to the constellation map
-        pass
+        proportion_keep = 0.95
+        peak_candidates.sort(key=lambda x: x[2], reverse=True)
+        num_peaks_to_keep = max(1, int(len(peak_candidates) * proportion_keep))
+        peak_candidates = peak_candidates[:num_peaks_to_keep]
+
+        for t_idx, f_idx, mag in peak_candidates:
+            constellation_map.append((t_idx, f_idx))
 
     # Remove peaks that are too close to each other (treated as duplicates)
     return remove_duplicate_peaks(constellation_map)
