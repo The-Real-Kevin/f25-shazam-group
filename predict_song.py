@@ -138,7 +138,7 @@ def add_song():
     #       response = requests.post(url, files=files)  # <-- access files 
     #                                                         dict via request.files
     # from flask import request
-
+    request.files[url]
     youtube_url = None
     
     # TODO: Check if the song already exists in the database using dba.check_if_song_exists
