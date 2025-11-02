@@ -140,6 +140,11 @@ export default function Recorder() {
           // TODO: Change important varaibles now that we have our prediction data
           // Hint: Some variables we might want to change are saving the predicted song,
           // the url of the associated youtube video, and some marker so our app knows to show the prediction
+          console.log("Prediction data received:", data);
+          setPredictedSong(data.predicted_song);
+          setPredictedConfidence(data.confidence);
+          setPredictedUrl(data.youtube_url);
+          setShowPrediction(true);
         })
         .catch((error) => {
           console.error("Error in prediction fetch:", error);
@@ -161,6 +166,24 @@ export default function Recorder() {
     const add_endpoint = "";
 
     // TODO: follow handlePrediction's fetch structure to make a JavaScript fetch
+    fetch(add_endpoint, {
+      method: "POST",
+      body: formData,
+    } )
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Song added successfully:", data);
+        setAddingSong(false);
+        Alert.alert("Song added successfully!");
+      })
+      .catch((error) => {
+        console.error("Error adding song:", error);
+        setAddingSong(false);
+        Alert.alert("Error adding song. Please try again.");
+      }
+    )
   }
 
   return (
