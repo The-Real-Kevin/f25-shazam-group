@@ -1,30 +1,26 @@
-import React, { useEffect, useState, useRef } from "react";
 import {
-  useAudioRecorder,
   AudioModule,
-  useAudioRecorderState,
   setAudioModeAsync,
-  RecordingPresets,
-  RecordingStatus,
-  AudioRecorder,
-  useAudioPlayer,
+  useAudioRecorder,
+  useAudioRecorderState
 } from "expo-audio";
 import { Audio } from "expo-av";
+import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
+  Alert,
   Button,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
-  TouchableOpacity,
   TextInput,
+  TouchableOpacity,
   View,
-  Image,
-  Alert,
-  Platform,
-  KeyboardAvoidingView,
-  ActivityIndicator,
 } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
-import { SafeAreaView, SafeAreaProvider } from "react-native-safe-area-context";
 
 function extractYouTubeVideoId(url: string | null): string {
   if (!url) return "";
@@ -69,9 +65,9 @@ export default function Recorder() {
   const [predictedUrl, setPredictedUrl] = useState<string | null>(null);
   const [showPrediction, setShowPrediction] = useState(false);
   const [addingSong, setAddingSong] = useState(false);
-  // const audioPlayer = useAudioPlayer();
-  // const [audioPlayer, setAudioPlayer] = useState(null);
-  //   const [permission, requestPermission] = useAudPermissions();
+  //const audioPlayer = useAudioPlayer();
+  //const [audioPlayer, setAudioPlayer] = useState(null);
+  //const [permission, requestPermission] = useAudPermissions();
 
   const record = async () => {
     await audioRecorder.prepareToRecordAsync();
@@ -102,7 +98,7 @@ export default function Recorder() {
   const handlePrediction = async () => {
     console.log("Handling prediction...");
     if (uri) {
-      // const response = await getPredictedSong();
+      //const response = await getPredictedSong();
 
       const formData = new FormData();
 
@@ -121,7 +117,7 @@ export default function Recorder() {
       console.log("Sending POST request to server...");
 
       // TODO: type in your server address here
-      const predict_endpoint = "";
+      const predict_endpoint = `${window.location.protocol}//${window.location.host}/predict`;
 
       // This is our first JavaScript promise which is a fetch request to the server
       // We start by making a post request to our prediction endpoint using the form data above
@@ -137,7 +133,11 @@ export default function Recorder() {
         })
         .then((data) => {
           // Now that we have the JSON data, we can change our state to reflect the prediction
-          // TODO: Change important varaibles now that we have our prediction data
+          // Change important varaibles now that we have our prediction data
+          setPredictedSong(data.song);
+          setPredictedUrl(data.youtubeUrl);
+          setShowPrediction(true);
+          setPredictedConfidence(data.confidence);
           // Hint: Some variables we might want to change are saving the predicted song,
           // the url of the associated youtube video, and some marker so our app knows to show the prediction
           console.log("Prediction data received:", data);
@@ -159,11 +159,11 @@ export default function Recorder() {
 
     const formData = new FormData();
 
-    // TODO: Append the correct data to our form in a way that our endpoint can access
+    // Append the correct data to our form in a way that our endpoint can access
     formData.append("youtube_url", song_url);
 
-    // TODO: type in your server address here
-    const add_endpoint = "";
+    // type in your server address here
+    const add_endpoint = `${window.location.protocol}//${window.location.host}`;
 
     // TODO: follow handlePrediction's fetch structure to make a JavaScript fetch
     fetch(add_endpoint, {
@@ -199,12 +199,12 @@ export default function Recorder() {
             >
               {recorderState.isRecording ? (
                 <Image
-                  source={require("../../assets/images/square-icon.png")}
+                  source={require("./square-icon.png")}
                   style={{ width: 100, height: 100 }}
                 />
               ) : (
                 <Image
-                  source={require("../../assets/images/free-microphone-icon.png")}
+                  source={require("./min-icon.png")}
                   style={{ width: 100, height: 100 }}
                 />
               )}
@@ -279,7 +279,7 @@ export default function Recorder() {
               value={text}
               onChangeText={setText}
               placeholder="Enter YouTube URL here..."
-              onSubmitEditing={}
+              onSubmitEditing={() => addSongToDatabase(text)}
               returnKeyType="done"
             />
           </KeyboardAvoidingView>
@@ -293,11 +293,10 @@ export default function Recorder() {
 
           {/** This is our button to add a song to the database. It only shows up if we are not currently adding a song. **/}
           {!addingSong && (
-            <View style={{ width: 150, marginBottom: 20, marginTop: 10 }}>
-              {/** Implement the same function as above for onPress to add a song to the database. **/}
-              <Button title="Add Song" onPress={} />
-            </View>
-          )}
+  <View style={{ width: 150, marginBottom: 20, marginTop: 10 }}>
+    <Button title="Add Song" onPress={() => addSongToDatabase(text)} />
+  </View>
+)}
         </SafeAreaView>
       </SafeAreaProvider>
     </>
